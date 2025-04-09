@@ -8,7 +8,12 @@ app.use(express.json());
 
 app.use('/api/notas', notasRouter);
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Servidor backend escuchando en puerto ${PORT}`);
-});
+// Solo lanzamos el servidor si no está en modo test
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`Servidor backend escuchando en puerto ${PORT}`);
+  });
+}
+
+module.exports = app; // para poder testearlo
