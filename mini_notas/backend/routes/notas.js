@@ -43,4 +43,31 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Actualizar una nota
+router.put('/:id', async (req, res) => {
+  const { texto } = req.body;
+  const { id } = req.params;
+
+  if (!texto || texto.trim() === '') {
+    return res.status(400).json({ error: 'Texto requerido' });
+  }
+
+  try {
+    const result = await db.query(
+      'UPDATE notas SET texto = $1 WHERE id = $2 RETURNING *',
+      [texto, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Nota no encontrada' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error al editar nota:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+
 module.exports = router;

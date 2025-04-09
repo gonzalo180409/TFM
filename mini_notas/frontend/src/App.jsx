@@ -7,6 +7,8 @@ function App() {
 
   const [notas, setNotas] = useState([]);
   const [texto, setTexto] = useState('');
+  const [editandoId, setEditandoId] = useState(null);
+  const [nuevoTexto, setNuevoTexto] = useState('');
 
   useEffect(() => {
     fetch(API_BASE)
@@ -30,6 +32,25 @@ function App() {
       .then(() => setNotas(notas.filter(n => n.id !== id)));
   };
 
+  const empezarEdicion = (nota) => {
+    setEditandoId(nota.id);
+    setNuevoTexto(nota.texto);
+  };
+
+  const guardarEdicion = (id) => {
+    fetch(`${API_BASE}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texto: nuevoTexto })
+    })
+      .then(res => res.json())
+      .then(actualizada => {
+        setNotas(notas.map(n => (n.id === id ? actualizada : n)));
+        setEditandoId(null);
+        setNuevoTexto('');
+      });
+  };
+
   return (
     <div>
       <h1>MiniNotas</h1>
@@ -37,7 +58,25 @@ function App() {
       <button onClick={agregarNota}>Agregar</button>
       <ul>
         {notas.map(n => (
-          <li key={n.id}>{n.texto} <button onClick={() => eliminarNota(n.id)}>X</button></li>
+          <li key={n.id}>
+            {editandoId === n.id ? (
+              <>
+                <input
+                  value={nuevoTexto}
+                  onChange={e => setNuevoTexto(e.target.value)}
+                />
+                <button onClick={() => guardarEdicion(n.id)}>💾</button>
+              </>
+            ) : (
+              <>
+                {n.texto} 
+                <button onClick={() => empezarEdicion(n)}>✏️</button>
+                <button onClick={() => eliminarNota(n.id)}>❌</button>
+                <br />
+                <small>{new Date(n.fecha).toLocaleString()}</small>{' '}
+              </>
+            )}
+          </li>
         ))}
       </ul>
     </div>
