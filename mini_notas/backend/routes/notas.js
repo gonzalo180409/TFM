@@ -1,26 +1,46 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../db');
 
-let notas = [];
-let id = 1;
-
-router.get('/', (req, res) => {
-  res.json(notas);
+// Obtener todas las notas
+router.get('/', async (req, res) => {
+  try {
+    const result = await db.query('SELECT * FROM notas ORDER BY id');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error al obtener notas:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
-router.post('/', (req, res) => {
+// Crear una nueva nota
+router.post('/', async (req, res) => {
   const { texto } = req.body;
-  if (!texto) return res.status(400).json({ error: 'Texto requerido' });
+  if (!texto || texto.trim() === '') {
+    return res.status(400).json({ error: 'Texto requerido' });
+  }
 
-  const nuevaNota = { id: id++, texto };
-  notas.push(nuevaNota);
-  res.status(201).json(nuevaNota);
+  try {
+    const result = await db.query(
+      'INSERT INTO notas (texto, fecha) VALUES ($1, NOW()) RETURNING *',
+      [texto]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('Error al crear nota:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
-router.delete('/:id', (req, res) => {
-  const notaId = parseInt(req.params.id);
-  notas = notas.filter(n => n.id !== notaId);
-  res.status(204).end();
+// Eliminar una nota
+router.delete('/:id', async (req, res) => {
+  try {
+    await db.query('DELETE FROM notas WHERE id = $1', [req.params.id]);
+    res.status(204).end();
+  } catch (err) {
+    console.error('Error al eliminar nota:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 module.exports = router;
