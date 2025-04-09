@@ -1,17 +1,21 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
 
 function App() {
+
+  const API_BASE = 'http://localhost:3001/api/notas'; // usa el nombre del servicio Docker
+
   const [notas, setNotas] = useState([]);
   const [texto, setTexto] = useState('');
 
   useEffect(() => {
-    fetch('/api/notas')
+    fetch(API_BASE)
       .then(res => res.json())
       .then(data => setNotas(data));
   }, []);
 
   const agregarNota = () => {
-    fetch('/api/notas', {
+    fetch(API_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ texto })
@@ -22,7 +26,7 @@ function App() {
   };
 
   const eliminarNota = (id) => {
-    fetch(`/api/notas/${id}`, { method: 'DELETE' })
+    fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
       .then(() => setNotas(notas.filter(n => n.id !== id)));
   };
 
