@@ -4,8 +4,18 @@ const db = require('../db');
 
 // Obtener todas las notas
 router.get('/', async (req, res) => {
+  const { fecha } = req.query;
   try {
-    const result = await db.query('SELECT * FROM notas ORDER BY id');
+    let result;
+    if (fecha) {
+      result = await db.query(
+        'SELECT * FROM notas WHERE fecha_asignada = $1 ORDER BY id',
+        [fecha]
+      );
+    } else {
+      result = await db.query('SELECT * FROM notas ORDER BY id');
+    }
+
     res.json(result.rows);
   } catch (err) {
     console.error('Error al obtener notas:', err);
@@ -13,17 +23,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+
 // Crear una nueva nota
 router.post('/', async (req, res) => {
-  const { texto } = req.body;
+  const { texto, fecha_asignada } = req.body;
   if (!texto || texto.trim() === '') {
     return res.status(400).json({ error: 'Texto requerido' });
   }
 
   try {
     const result = await db.query(
-      'INSERT INTO notas (texto, fecha) VALUES ($1, NOW()) RETURNING *',
-      [texto]
+      'INSERT INTO notas (texto, fecha, fecha_asignada) VALUES ($1, NOW(), $2) RETURNING *',
+      [texto, fecha_asignada || null]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -31,6 +42,7 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
 
 // Eliminar una nota
 router.delete('/:id', async (req, res) => {
