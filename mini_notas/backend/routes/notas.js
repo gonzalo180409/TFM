@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const auth = require('../middleware/auth');
+
+router.use(auth);
+
 
 // Obtener todas las notas
 router.get('/', async (req, res) => {
@@ -9,11 +13,14 @@ router.get('/', async (req, res) => {
     let result;
     if (fecha) {
       result = await db.query(
-        'SELECT * FROM notas WHERE fecha_asignada = $1 ORDER BY id',
-        [fecha]
+        'SELECT * FROM notas WHERE fecha_asignada = $1 AND user_id = $2 ORDER BY id',
+        [fecha, req.user.id]
       );
     } else {
-      result = await db.query('SELECT * FROM notas ORDER BY id');
+      result = await db.query(
+        'SELECT * FROM notas WHERE user_id = $1 ORDER BY id',
+        [req.user.id]
+      );
     }
 
     res.json(result.rows);
@@ -22,7 +29,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
-
 
 // Crear una nueva nota
 router.post('/', async (req, res) => {
@@ -33,8 +39,8 @@ router.post('/', async (req, res) => {
 
   try {
     const result = await db.query(
-      'INSERT INTO notas (texto, fecha, fecha_asignada) VALUES ($1, NOW(), $2) RETURNING *',
-      [texto, fecha_asignada || null]
+      'INSERT INTO notas (texto, fecha, fecha_asignada, user_id) VALUES ($1, NOW(), $2, $3) RETURNING *',
+      [texto, fecha_asignada || null, req.user.id]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -81,22 +87,24 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-  // Obtener fechas únicas con notas
-  router.get('/fechas', async (req, res) => {
-    try {
-      const result = await db.query(`
-        SELECT DISTINCT TO_CHAR(fecha_asignada, 'YYYY-MM-DD') AS fecha
-        FROM notas
-        WHERE fecha_asignada IS NOT NULL
-      `);
+  // Obtener fechas únicas con notas del usuario autenticado
+router.get('/fechas', async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT DISTINCT TO_CHAR(fecha_asignada, 'YYYY-MM-DD') AS fecha
+       FROM notas
+       WHERE fecha_asignada IS NOT NULL AND user_id = $1`,
+      [req.user.id]
+    );
 
-      const fechas = result.rows.map(row => row.fecha);
-      res.json(fechas);
-    } catch (err) {
-      console.error('Error al obtener fechas con notas:', err);
-      res.status(500).json({ error: 'Error interno del servidor' });
-    }
-  });
+    const fechas = result.rows.map(row => row.fecha);
+    res.json(fechas);
+  } catch (err) {
+    console.error('Error al obtener fechas con notas:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 
 
 
