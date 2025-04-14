@@ -35,11 +35,11 @@ jobs:
         node-version: 18
 
     - name: 📦 Instalar dependencias del backend
-      working-directory: ./backend
+      working-directory: ./mini_notas/backend
       run: npm install
 
     - name: 🧪 Test del backend
-      working-directory: ./backend
+      working-directory: ./mini_notas/backend
       env:
         DB_HOST: localhost
         DB_PORT: 5432
@@ -52,9 +52,9 @@ jobs:
         npm test
 
     - name: 📦 Instalar dependencias del frontend
-      working-directory: ./frontend
+      working-directory: ./mini_notas/frontend
       run: npm install
 
     - name: 🧪 Test del frontend
-      working-directory: ./frontend
+      working-directory: ./mini_notas/frontend
       run: npm test
