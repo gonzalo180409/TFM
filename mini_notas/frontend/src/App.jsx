@@ -13,7 +13,7 @@ function App() {
     const hoy = new Date();
     return hoy.toISOString().split('T')[0]; // formato YYYY-MM-DD
   }
-
+  // test CI
   // Cargar notas del día seleccionado
   useEffect(() => {
     fetch(`${API_BASE}?fecha=${diaSeleccionado}`)
