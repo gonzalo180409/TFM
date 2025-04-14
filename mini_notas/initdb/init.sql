@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS notas (
+  id SERIAL PRIMARY KEY,
+  texto TEXT NOT NULL,
+  fecha TIMESTAMP DEFAULT NOW(),
+  fecha_asignada DATE
+);
