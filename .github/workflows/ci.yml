@@ -49,7 +49,15 @@ jobs:
         NODE_ENV: test
       run: |
         sleep 5
+        PGPASSWORD=devpass psql -h localhost -U devuser -d mininotas -p 5432 -c "
+        CREATE TABLE IF NOT EXISTS notas (
+          id SERIAL PRIMARY KEY,
+          texto TEXT NOT NULL,
+          fecha TIMESTAMP DEFAULT NOW(),
+          fecha_asignada DATE
+        );"
         npm test
+
 
     - name: 📦 Instalar dependencias del frontend
       working-directory: ./mini_notas/frontend
