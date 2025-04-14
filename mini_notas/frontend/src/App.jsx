@@ -13,13 +13,32 @@ function App() {
     const hoy = new Date();
     return hoy.toISOString().split('T')[0]; // formato YYYY-MM-DD
   }
-  // test CI
+
   // Cargar notas del día seleccionado
   useEffect(() => {
     fetch(`${API_BASE}?fecha=${diaSeleccionado}`)
       .then(res => res.json())
       .then(data => setNotas(data));
   }, [diaSeleccionado]);
+
+  const [diasConNotas, setDiasConNotas] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/fechas`)
+      .then(res => res.json())
+      .then(data => setDiasConNotas(data));
+  }, []);
+
+  const cargarDiasConNotas = () => {
+    fetch(`${API_BASE}/fechas`)
+      .then(res => res.json())
+      .then(data => setDiasConNotas(data));
+  };
+  useEffect(() => {
+    cargarDiasConNotas();
+  }, []);
+  
+
 
   const agregarNota = () => {
     fetch(API_BASE, {
@@ -28,13 +47,19 @@ function App() {
       body: JSON.stringify({ texto, fecha_asignada: diaSeleccionado })
     })
       .then(res => res.json())
-      .then(nueva => setNotas(prev => [...prev, nueva]));
+      .then(nueva => {
+        setNotas(prev => [...prev, nueva]);
+        cargarDiasConNotas(); // 🔄 Refresca los días con notas
+      });
     setTexto('');
   };
 
   const eliminarNota = (id) => {
     fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
-      .then(() => setNotas(notas.filter(n => n.id !== id)));
+      .then(() =>  {
+        setNotas(prev => prev.filter(n => n.id !== id));
+        cargarDiasConNotas(); // 🔄 También aquí para refrescar si queda vacío
+      });
   };
 
   const empezarEdicion = (nota) => {
@@ -82,7 +107,12 @@ function App() {
             onClick={() => setDiaSeleccionado(dia)}
             style={{
               padding: '8px',
-              backgroundColor: dia === diaSeleccionado ? '#a2d2ff' : '#eee',
+              backgroundColor:
+                dia === diaSeleccionado
+                  ? '#a2d2ff'
+                  : diasConNotas.includes(dia)
+                    ? '#b4f8c8'
+                    : '#eee',
               border: '1px solid #ccc',
               cursor: 'pointer'
             }}
@@ -91,7 +121,6 @@ function App() {
           </button>
         ))}
       </div>
-
       <h3>
         Notas para el {(() => {
           const [a, m, d] = diaSeleccionado.split('-');

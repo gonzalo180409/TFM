@@ -24,6 +24,13 @@ describe('API /api/notas', () => {
     notaCreada = response.body;
   });
 
+  it('GET /fechas debe incluir la fecha asignada a la nota creada', async () => {
+    const response = await request(app).get('/api/notas/fechas');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain(fechaTest);
+  });
+  
+
   it('PUT debe editar la nota creada', async () => {
     const response = await request(app)
       .put(`/api/notas/${notaCreada.id}`)
@@ -45,4 +52,11 @@ describe('API /api/notas', () => {
     const response = await request(app).delete(`/api/notas/${notaCreada.id}`);
     expect(response.statusCode).toBe(204);
   });
+
+  it('GET /fechas NO debe incluir la fecha si se eliminó la única nota', async () => {
+    const response = await request(app).get('/api/notas/fechas');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).not.toContain(fechaTest);
+  });
+
 });

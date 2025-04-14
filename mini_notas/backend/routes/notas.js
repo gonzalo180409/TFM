@@ -81,5 +81,23 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+  // Obtener fechas únicas con notas
+  router.get('/fechas', async (req, res) => {
+    try {
+      const result = await db.query(`
+        SELECT DISTINCT TO_CHAR(fecha_asignada, 'YYYY-MM-DD') AS fecha
+        FROM notas
+        WHERE fecha_asignada IS NOT NULL
+      `);
+
+      const fechas = result.rows.map(row => row.fecha);
+      res.json(fechas);
+    } catch (err) {
+      console.error('Error al obtener fechas con notas:', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  });
+
+
 
 module.exports = router;
