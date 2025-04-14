@@ -1,8 +1,8 @@
 # 📝 MiniNotas
 
-MiniNotas es una aplicación web desarrollada como parte del Trabajo Fin de Máster (TFM) del Máster en DevOps. Permite a los usuarios crear, editar y eliminar notas asociadas a días del mes en un calendario simple.
+MiniNotas es una aplicación web desarrollada como parte del Trabajo Fin de Máster (TFM) del Máster en DevOps. Permite a los usuarios registrarse, iniciar sesión y gestionar notas personales por día en un calendario interactivo.
 
-Este proyecto pone en práctica múltiples conceptos clave de DevOps: contenedores, integración y entrega continua (CI/CD), testing automatizado, persistencia de datos con PostgreSQL, y despliegue local con Docker Compose.
+Este proyecto pone en práctica múltiples conceptos clave de DevOps: contenedores, integración y entrega continua (CI/CD), testing automatizado, autenticación segura con JWT, persistencia de datos con PostgreSQL, y despliegue local con Docker Compose.
 
 ---
 
@@ -22,12 +22,13 @@ Este proyecto pone en práctica múltiples conceptos clave de DevOps: contenedor
 
 ## 🚀 Funcionalidades principales
 
-- Añadir notas a días concretos del calendario
-- Editar y eliminar notas
-- Persistencia en base de datos
-- Visualización por día
-- Tests automáticos de backend y frontend
-- CI con ejecución automática de pruebas
+- Registro e inicio de sesión de usuarios con JWT 🔐
+- Crear, editar y eliminar notas personales
+- Visualización por días del mes en forma de calendario
+- Días con notas marcados en verde
+- Persistencia de datos por usuario autenticado
+- Pruebas automatizadas de backend y autenticación
+- CI configurada para ejecutar tests en cada push
 
 ---
 
@@ -71,7 +72,8 @@ docker-compose exec frontend npm test
 
 El repositorio incluye una pipeline configurada en `.github/workflows/ci.yml` que:
 
-- Ejecuta los tests del backend y frontend
+- Levanta una base de datos PostgreSQL temporal
+- Ejecuta tests de autenticación y funcionalidades de notas
 - Valida los cambios en cada push a `develop`
 - Impide merge a `main` si los tests fallan
 
