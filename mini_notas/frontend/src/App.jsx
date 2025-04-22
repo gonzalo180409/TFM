@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 function App() {
-  const API_BASE = 'http://localhost:3001/api/notas';
+  const API_BASE = '/api/notas';
   const token = localStorage.getItem('token');
 
   const [notas, setNotas] = useState([]);

@@ -7,7 +7,7 @@ function Registro({ onVolverLogin }) {
   const [error, setError] = useState('');
 
   const handleRegistro = () => {
-    fetch('http://localhost:3001/api/auth/register', {
+    fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })

@@ -15,8 +15,8 @@ services:
 
   backend:
     build: ./backend
-    ports:
-      - "3001:3001"
+    expose:
+      - "3001"
     depends_on:
       - db
     environment:
@@ -26,10 +26,12 @@ services:
       DB_PASSWORD: devpass
       DB_NAME: mininotas
 
-  frontend:
-    build: ./frontend
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
     ports:
-      - "3000:3000"
+      - "80:80"
     depends_on:
       - backend
 
