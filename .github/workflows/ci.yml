@@ -35,11 +35,11 @@ jobs:
         node-version: 18
 
     - name: 📦 Instalar dependencias del backend
-      working-directory: ./backend
+      working-directory: ./mini_notas/backend
       run: npm install
 
     - name: 🧪 Test del backend
-      working-directory: ./backend
+      working-directory: ./mini_notas/backend
       env:
         DB_HOST: localhost
         DB_PORT: 5432
@@ -49,12 +49,29 @@ jobs:
         NODE_ENV: test
       run: |
         sleep 5
+        PGPASSWORD=devpass psql -h localhost -U devuser -d mininotas -p 5432 -c "
+
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+          );
+
+          CREATE TABLE IF NOT EXISTS notas (
+            id SERIAL PRIMARY KEY,
+            texto TEXT NOT NULL,
+            fecha TIMESTAMP DEFAULT NOW(),
+            fecha_asignada DATE,
+            user_id INTEGER REFERENCES usuarios(id)
+          );
+        "
         npm test
 
+
     - name: 📦 Instalar dependencias del frontend
-      working-directory: ./frontend
+      working-directory: ./mini_notas/frontend
       run: npm install
 
     - name: 🧪 Test del frontend
-      working-directory: ./frontend
+      working-directory: ./mini_notas/frontend
       run: npm test

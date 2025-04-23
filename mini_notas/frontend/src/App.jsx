@@ -1,40 +1,75 @@
 import React, { useEffect, useState } from 'react';
 
 function App() {
-  const API_BASE = 'http://localhost:3001/api/notas';
+  const API_BASE = '/api/notas';
+  const token = localStorage.getItem('token');
 
   const [notas, setNotas] = useState([]);
   const [texto, setTexto] = useState('');
   const [editandoId, setEditandoId] = useState(null);
   const [nuevoTexto, setNuevoTexto] = useState('');
   const [diaSeleccionado, setDiaSeleccionado] = useState(getHoy());
+  const [diasConNotas, setDiasConNotas] = useState([]);
 
   function getHoy() {
     const hoy = new Date();
-    return hoy.toISOString().split('T')[0]; // formato YYYY-MM-DD
+    return hoy.toISOString().split('T')[0];
   }
-  // test CI
-  // Cargar notas del día seleccionado
+
   useEffect(() => {
-    fetch(`${API_BASE}?fecha=${diaSeleccionado}`)
+    if (!token) return;
+    fetch(`${API_BASE}?fecha=${diaSeleccionado}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
       .then(res => res.json())
       .then(data => setNotas(data));
   }, [diaSeleccionado]);
 
+  const cargarDiasConNotas = () => {
+    fetch(`${API_BASE}/fechas`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => setDiasConNotas(data));
+  };
+
+  useEffect(() => {
+    if (token) {
+      cargarDiasConNotas();
+    }
+  }, []);
+
   const agregarNota = () => {
     fetch(API_BASE, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
       body: JSON.stringify({ texto, fecha_asignada: diaSeleccionado })
     })
       .then(res => res.json())
-      .then(nueva => setNotas(prev => [...prev, nueva]));
+      .then(nueva => {
+        setNotas(prev => [...prev, nueva]);
+        cargarDiasConNotas();
+      });
     setTexto('');
   };
 
   const eliminarNota = (id) => {
-    fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
-      .then(() => setNotas(notas.filter(n => n.id !== id)));
+    fetch(`${API_BASE}/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(() => {
+      setNotas(prev => prev.filter(n => n.id !== id));
+      cargarDiasConNotas();
+    });
   };
 
   const empezarEdicion = (nota) => {
@@ -45,7 +80,10 @@ function App() {
   const guardarEdicion = (id) => {
     fetch(`${API_BASE}/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
       body: JSON.stringify({ texto: nuevoTexto })
     })
       .then(res => res.json())
@@ -59,7 +97,7 @@ function App() {
   const generarDias = () => {
     const dias = [];
     const año = 2025;
-    const mes = 7; // Julio → ¡ahora como número humano!
+    const mes = 7;
     for (let i = 1; i <= 31; i++) {
       const dia = i.toString().padStart(2, '0');
       const mesFormateado = mes.toString().padStart(2, '0');
@@ -68,11 +106,16 @@ function App() {
     }
     return dias;
   };
-  
-    
+
   return (
     <div>
       <h1>MiniNotas por Día</h1>
+      <button onClick={() => {
+        localStorage.removeItem('token');
+        window.location.reload();
+      }}>
+        Cerrar sesión
+      </button>
 
       <h3>Selecciona un día</h3>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px' }}>
@@ -82,7 +125,12 @@ function App() {
             onClick={() => setDiaSeleccionado(dia)}
             style={{
               padding: '8px',
-              backgroundColor: dia === diaSeleccionado ? '#a2d2ff' : '#eee',
+              backgroundColor:
+                dia === diaSeleccionado
+                  ? '#a2d2ff'
+                  : diasConNotas.includes(dia)
+                    ? '#b4f8c8'
+                    : '#eee',
               border: '1px solid #ccc',
               cursor: 'pointer'
             }}

@@ -1,12 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const notasRouter = require('./routes/notas');
+const authRouter = require('./routes/auth');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 app.use('/api/notas', notasRouter);
+app.use('/api/auth', authRouter);
 
 // Solo lanzamos el servidor si no está en modo test
 if (process.env.NODE_ENV !== 'test') {
