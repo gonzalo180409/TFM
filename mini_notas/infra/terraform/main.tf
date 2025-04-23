@@ -69,7 +69,7 @@ resource "aws_instance" "mininotas_ec2" {
               su - ubuntu <<INNER
               cd ~
               git clone https://github.com/gonzalo180409/TFM.git
-              cd mini_notas
+              cd TFM/mini_notas
               sudo chmod -R 755 ./initdb
               sudo chown -R ubuntu:ubuntu ./initdb
               docker-compose up -d --build
