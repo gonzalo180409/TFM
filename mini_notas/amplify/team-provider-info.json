@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-mininotas-dev-0ae74-authRole",
+      "UnauthRoleArn": "arn:aws:iam::061043049675:role/amplify-mininotas-dev-0ae74-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::061043049675:role/amplify-mininotas-dev-0ae74-authRole",
+      "Region": "eu-west-3",
+      "DeploymentBucketName": "amplify-mininotas-dev-0ae74-deployment",
+      "UnauthRoleName": "amplify-mininotas-dev-0ae74-unauthRole",
+      "StackName": "amplify-mininotas-dev-0ae74",
+      "StackId": "arn:aws:cloudformation:eu-west-3:061043049675:stack/amplify-mininotas-dev-0ae74/ee7a3940-20f1-11f0-b201-0e74e98004d3",
+      "AmplifyAppId": "d8inb0brfc1na"
+    },
+    "categories": {
+      "auth": {
+        "mininotas5a5ad09f": {}
+      }
+    }
+  }
+}
